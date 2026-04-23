@@ -1,9 +1,10 @@
+import React from 'react'
 
-function App() {
+const App = () => {
   return (
-    <h1 className="text-4xl font-bold text-blue-600 mt-2">
-      Tailwind is Working 
-    </h1>
+    <div>
+      <h2 className='text-amber-500'>Welcome to Vite+React</h2>
+    </div>
   )
 }
 
