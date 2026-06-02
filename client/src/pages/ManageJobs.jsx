@@ -8,7 +8,7 @@ const ManageJobs = () => {
   const navigate = useNavigate();
 
   return (
-    <div className='container p-4 max-w-5xl'>
+    <div className='container p-4 mt-5 max-sm:p-0 max-w-5xl'>
       <div className='overflow-x-auto'>
         <table className='min-w-full bg-white border max-sm:text-sm'>
           <thead>

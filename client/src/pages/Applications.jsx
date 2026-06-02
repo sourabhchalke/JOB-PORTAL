@@ -60,7 +60,7 @@ const Applications = () => {
         <table className="min-w-full bg-white border rounded-lg">
           <thead>
             <tr>
-              <th className="py-3 px-4 border-b text-left">Company</th>
+              <th className="py-3 px-4 border-b text-left max-sm:hidden">Company</th>
               <th className="py-3 px-4 border-b text-left">Job Title</th>
               <th className="py-3 px-4 border-b text-left max-sm:hidden">
                 Location
@@ -75,11 +75,11 @@ const Applications = () => {
             {jobsApplied.map((job, index) =>
               true ? (
                 <tr>
-                  <td className="py-3 px-4 flex items-center gap-4 border-b">
+                  <td className="py-3 px-4 flex items-center gap-4 border-b max-sm:hidden">
                     <img className="w-8 h-8" src={job.logo} alt="" />
                     {job.company}
                   </td>
-                  <td className="py-2 px-4 border-b">{job.title}</td>
+                  <td className="py-2 px-4 border-b ">{job.title}</td>
                   <td className="py-2 px-4 border-b max-sm:hidden">
                     {job.location}
                   </td>
