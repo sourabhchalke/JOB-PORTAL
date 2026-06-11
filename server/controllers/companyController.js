@@ -239,7 +239,10 @@ export const getCompanyData = async (req, res) => {
 
 // Post a new job
 export const postJob = async (req, res) => {
-  // Add your logic here
+  
+  const {title,description,location,salary}=req.body;
+
+
 };
 
 // Get Company Job Applicants
