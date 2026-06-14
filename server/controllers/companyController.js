@@ -235,7 +235,20 @@ export const loginCompany = async (req, res) => {
 
 // Get company data
 export const getCompanyData = async (req, res) => {
-  // Add your logic here
+
+  try {
+    
+    const company = req.company;
+
+    res.json({success:true,company})
+
+  } catch (error) {
+    res.json({
+      success:false,
+      message:error.message
+    })
+  }
+
 };
 
 // Post a new job
@@ -277,12 +290,25 @@ export const getCompanyJobApplicants = async (req, res) => {
 
 // Get Company Posted Jobs
 export const getCompanyPostedJobs = async (req, res) => {
-  // Add your logic here
+  
+  try {
+    
+    const companyId = req.company._id;
+
+    const jobs = await Job.find({companyId});
+
+    //(ToDo) Adding No. of applicants info in data
+    res.json({success:true,jobsData:jobs});
+
+  } catch (error) {
+    res.json({success:true,message:error.message});
+  }
+
 };
 
 // Change Job Application Status
 export const ChangeJobApplicationsStatus = async (req, res) => {
-  // Add your logic here
+  
 };
 
 // Change Job Visiblity
