@@ -22,7 +22,7 @@ router.post('/post-job',protectCompany,postJob);
 router.get('/applicants',protectCompany,getCompanyJobApplicants);
 
 //Get Company Job List
-router.get('/list-job',protectCompany,getCompanyPostedJobs);
+router.get('/list-jobs',protectCompany,getCompanyPostedJobs);
 
 //Change Applications Status
 router.post('/change-status',protectCompany,ChangeJobApplicationsStatus);
