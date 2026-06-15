@@ -13,6 +13,7 @@
     "@clerk/react": "^6.4.3",
     "@tailwindcss/vite": "^4.2.4",
     "autoprefixer": "^10.5.0",
+    "axios": "^1.18.0",
     "convert": "^7.0.0",
     "D": "^1.0.0",
     "k-convert": "^1.0.6",
@@ -23,6 +24,7 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.14.2",
+    "react-toastify": "^11.1.0",
     "tailwindcss": "^4.2.4",
     "tostify": "^0.0.1"
   },
