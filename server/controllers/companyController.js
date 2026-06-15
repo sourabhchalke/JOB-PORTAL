@@ -153,10 +153,10 @@ export const registerCompany = async (req, res) => {
 
     // // Upload image to Cloudinary
     // console.log("Uploading to Cloudinary:", imageFile.path);
-    // const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
-    //     folder: 'company_logos', // Optional: organize in folders
-    //     transformation: [{ width: 500, height: 500, crop: 'limit' }] // Optional: resize
-    // });
+    const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+        folder: 'company_logos', // Optional: organize in folders
+        transformation: [{ width: 500, height: 500, crop: 'limit' }] // Optional: resize
+    });
 
     // // Delete temp file after upload
     // fs.unlink(imageFile.path, (err) => {
@@ -207,7 +207,14 @@ export const loginCompany = async (req, res) => {
   try {
     const company = await Company.findOne({ email });
 
-    if (bcrypt.compare(password, company.password)) {
+     if (!company) {
+        return res.json({
+            success: false,
+            message: "Invalid email or password"
+        });
+    }
+
+    if (await bcrypt.compare(password, company.password)) {
       res.json({
         success: true,
         company: {
