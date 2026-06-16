@@ -25,15 +25,18 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/apply-job/:id" element={<ApplyJob />} />
         <Route path="/applications" element={<Applications />} />
-        <Route path="/dashboard" element={<Dashboard />}>
+        
           {companyToken ? (
             <>
+            <Routes path="/dashboard" element={<Dashboard />}>
               <Route path="add-job" element={<AddJob />} />
               <Route path="manage-jobs" element={<ManageJobs />} />
               <Route path="view-applications" element={<ViewApplications />} />
+              </Routes>
             </>
+
           ) : null}
-        </Route>
+        
       </Routes>
     </div>
   );
