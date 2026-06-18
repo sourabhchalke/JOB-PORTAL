@@ -199,6 +199,11 @@ const fetchUserData = async () => {
     companyData,
     setCompanyData,
     backendUrl,
+    userData,
+    setUserData,
+    userApplications,
+    setUserApplications,
+    fetchUserData
   };
 
   return (
