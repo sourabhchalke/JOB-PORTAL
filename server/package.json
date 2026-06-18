@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.13.23",
     "@clerk/express": "^2.1.26",
     "@sentry/node": "^10.56.0",
     "bcrypt": "^6.0.0",
