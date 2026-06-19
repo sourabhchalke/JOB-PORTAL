@@ -142,7 +142,7 @@ const clerk = new Clerk({
   secretKey: process.env.CLERK_SECRET_KEY
 });
 
-console.log("✅ Clerk initialized with secret key:", process.env.CLERK_SECRET_KEY ? "Present" : "Missing");
+// console.log("✅ Clerk initialized with secret key:", process.env.CLERK_SECRET_KEY ? "Present" : "Missing");
 
 // ========== MIDDLEWARE ==========
 
@@ -151,25 +151,25 @@ app.use(cors());
 
 // 2. Custom Clerk Auth Middleware
 app.use(async (req, res, next) => {
-  console.log("\n🔐 Custom Clerk Auth Middleware");
+  // console.log("\n🔐 Custom Clerk Auth Middleware");
   
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.log("❌ No Bearer token found");
+    // console.log("❌ No Bearer token found");
     req.auth = null;
     return next();
   }
   
   const token = authHeader.substring(7);
-  console.log("Token received:", token.substring(0, 30) + "...");
+  // console.log("Token received:", token.substring(0, 30) + "...");
   
   try {
     // Verify the token with Clerk
     const payload = await clerk.verifyToken(token);
-    console.log("✅ Token verified successfully!");
-    console.log("User ID:", payload.sub);
-    console.log("Session ID:", payload.sid);
+    // console.log("✅ Token verified successfully!");
+    // console.log("User ID:", payload.sub);
+    // console.log("Session ID:", payload.sid);
     
     // Set auth object on request
     req.auth = {
@@ -178,10 +178,10 @@ app.use(async (req, res, next) => {
       ...payload
     };
     
-    console.log("✅ req.auth.userId set to:", req.auth.userId);
+    // console.log("✅ req.auth.userId set to:", req.auth.userId);
   } catch (error) {
-    console.log("❌ Token verification failed:", error.message);
-    console.log("Error details:", error);
+    // console.log("❌ Token verification failed:", error.message);
+    // console.log("Error details:", error);
     req.auth = null;
   }
   
