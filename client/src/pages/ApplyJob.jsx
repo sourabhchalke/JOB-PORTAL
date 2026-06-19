@@ -16,9 +16,12 @@ import JobCard from '../components/JobCard';
 import Footer from '../components/Footer';
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useAuth } from "@clerk/react";
 
 const ApplyJob = () => {
   const { id } = useParams();
+
+  const {getToken} = useAuth();
 
   const navigate = useNavigate();
 
@@ -42,22 +45,82 @@ const ApplyJob = () => {
     }
   };
 
-  const applyHandler = async()=>{
-    try {
+  // const applyHandler = async()=>{
+  //   try {
       
-      if(!userData){
-        return toast.error('Login to apply for jobs');
-      }
+  //     if(!userData){
+  //       return toast.error('Login to apply for jobs');
+  //     }
 
-      if(!userData.resume){
-        navigate('/applications');
-        return toast.error('Upload resume to apply');
-      }
+  //     if(!userData.resume){
+  //       navigate('/applications');
+  //       return toast.error('Upload resume to apply');
+  //     }
+
+  //     const token = await getToken();
+
+  //     const {data} = await axios.post(backendUrl+'/api/users/apply',
+  //       {jobId:JobData._id},
+  //       {headers:{Authorization:`Bearer ${token}`}}
+  //     )
+
+  //     if(data.success){
+  //       toast.success(data.message);
+  //     }else{
+  //       toast.error(data.message);
+  //     }
+
+  //   } catch (error) {
+  //     toast.error(error.message);
+  //   }
+  // }
+  //New applyHandler Debuuging
+  // Frontend - Add logging
+// ApplyJob.jsx
+const applyHandler = async () => {
+    try {
+        if (!userData) {
+            return toast.error('Login to apply for jobs');
+        }
+
+        if (!userData.resume) {
+            navigate('/applications');
+            return toast.error('Upload resume to apply');
+        }
+
+        const token = await getToken();
+        
+        console.log('📤 Applying for job with ID:', JobData._id);
+        console.log('📤 Full JobData:', JobData);
+
+        const { data } = await axios.post(
+            backendUrl + '/api/users/apply',
+            { jobId: JobData._id },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (data.success) {
+            toast.success(data.message);
+            // Optionally refresh to show applied status
+            // window.location.reload();
+        } else {
+            // ✅ Show the message from backend (will be "Already Applied")
+            toast.error(data.message);
+        }
 
     } catch (error) {
-      toast.error(error.message);
+        console.error('Apply error:', error);
+        
+        // ✅ Check if the error is because user already applied
+        if (error.response?.data?.message === 'You have already applied for this job') {
+            toast.info('You have already applied for this job');
+        } else if (error.response?.data?.message === 'You have already applied for this job') {
+            toast.info('You already applied to this position');
+        } else {
+            toast.error(error.response?.data?.message || error.message);
+        }
     }
-  }
+};
 
   useEffect(() => {
       fetchJob();

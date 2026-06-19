@@ -58,7 +58,7 @@ export const AppContextProvider = (props) => {
 
       if (data.success) {
         setCompanyData(data.company);
-        console.log(data);
+        // console.log(data);
       } else {
         toast.error(data.message);
       }
@@ -87,35 +87,35 @@ export const AppContextProvider = (props) => {
   //     }
   // }
 const fetchUserData = async () => {
-    console.log("=== FETCH USER DATA ===");
-    console.log("isLoaded:", isLoaded);
-    console.log("isSignedIn:", isSignedIn);
-    console.log("user exists:", !!user);
+    // console.log("=== FETCH USER DATA ===");
+    // console.log("isLoaded:", isLoaded);
+    // console.log("isSignedIn:", isSignedIn);
+    // console.log("user exists:", !!user);
     
     if (!isLoaded) {
-      console.log("⏳ Clerk not loaded yet");
+      // console.log("⏳ Clerk not loaded yet");
       return;
     }
     
     if (!isSignedIn) {
-      console.log("❌ User not signed in");
+      // console.log("❌ User not signed in");
       return;
     }
     
     try {
       // Get the token
       const token = await getToken();
-      console.log("Token obtained:", token ? "✅ Yes" : "❌ No");
-      console.log("Token preview:", token?.substring(0, 20) + "...");
+      // console.log("Token obtained:", token ? "✅ Yes" : "❌ No");
+      // console.log("Token preview:", token?.substring(0, 20) + "...");
       
       if (!token) {
-        toast.error("No authentication token available");
+        // toast.error("No authentication token available");
         return;
       }
       
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
-      console.log("Backend URL:", backendUrl);
-      console.log("Making request to:", `${backendUrl}/api/users/user`);
+      // console.log("Backend URL:", backendUrl);
+      // console.log("Making request to:", `${backendUrl}/api/users/user`);
       
       const response = await axios.get(`${backendUrl}/api/users/user`, {
         headers: { 
@@ -124,8 +124,8 @@ const fetchUserData = async () => {
         }
       });
       
-      console.log("Response status:", response.status);
-      console.log("Response data:", response.data);
+      // console.log("Response status:", response.status);
+      // console.log("Response data:", response.data);
       
       if (response.data.success) {
         setUserData(response.data.user);
@@ -136,14 +136,14 @@ const fetchUserData = async () => {
       }
       
     } catch (error) {
-      console.error("=== ERROR IN FETCH ===");
-      console.error("Error name:", error.name);
-      console.error("Error message:", error.message);
+      // console.error("=== ERROR IN FETCH ===");
+      // console.error("Error name:", error.name);
+      // console.error("Error message:", error.message);
       
       if (error.response) {
-        console.error("Response status:", error.response.status);
-        console.error("Response data:", error.response.data);
-        console.error("Response headers:", error.response.headers);
+        // console.error("Response status:", error.response.status);
+        // console.error("Response data:", error.response.data);
+        // console.error("Response headers:", error.response.headers);
         
         if (error.response.status === 401) {
           toast.error("Authentication failed. Please login again.");
@@ -154,7 +154,7 @@ const fetchUserData = async () => {
           toast.error(error.response.data?.message || "Failed to fetch user data");
         }
       } else if (error.request) {
-        console.error("No response received from server");
+        // console.error("No response received from server");
         toast.error("Cannot connect to server");
       } else {
         console.error("Error:", error.message);
@@ -162,6 +162,26 @@ const fetchUserData = async () => {
       }
     }
   };
+
+  //Function to fetch user's applied applications data
+  const fetchUserApplications = async()=>{
+    try {
+      
+      const token = await getToken();
+
+      const {data} = await axios.get(backendUrl+'/api/users/applications',
+        {headers:{Authorization:`Bearer ${token}`}}
+      )
+      if(data.success){
+        setUserApplications(data.applications);
+      }else{
+        toast.error(data.message);
+      }
+
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
 
   useEffect(() => {
     fetchJobs();
@@ -182,6 +202,7 @@ const fetchUserData = async () => {
   useEffect(() => {
     if (user) {
       fetchUserData();
+      fetchUserApplications();
     }
   },[user]);
 
@@ -203,7 +224,8 @@ const fetchUserData = async () => {
     setUserData,
     userApplications,
     setUserApplications,
-    fetchUserData
+    fetchUserData,
+    fetchUserApplications
   };
 
   return (
