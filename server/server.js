@@ -1,120 +1,3 @@
-// import './config/instrument.js'
-// import express from 'express'
-// import cors from 'cors'
-// import 'dotenv/config'
-// import connectDB from './config/db.js';
-// import * as Sentry from '@sentry/node';
-// import { clerkWebhooks } from './controllers/webhooks.js';
-// import companyRoutes from './routes/companyRoutes.js';
-// import connectCloudinary from './config/cloudinary.js';
-// import jobRoutes from './routes/jobRoutes.js';
-// import userRoutes from './routes/userRoutes.js';
-// import {clerkMiddleware} from '@clerk/express';
-
-
-// // Initialize Express
-// const app = express();
-
-// //Connect to Database
-// await connectDB();
-// await connectCloudinary();
-
-
-// app.post(
-//   '/webhooks',
-//   express.raw({ type: 'application/json' }),
-//   clerkWebhooks
-// );
-// //Middlewares
-// app.use(cors())
-
-// // app.use((req, res, next) => {
-// //   console.log("=== REQUEST DEBUG ===");
-// //   console.log("Method:", req.method);
-// //   console.log("URL:", req.url);
-// //   console.log("Authorization header:", req.headers.authorization ? "✅ Present" : "❌ Missing");
-// //   if (req.headers.authorization) {
-// //     console.log("Token preview:", req.headers.authorization.substring(0, 30) + "...");
-// //   }
-// //   console.log("=====================");
-// //   next();
-// // });
-// // app.use(clerkMiddleware());
-// // app.use((req, res, next) => {
-// //   console.log("=== AFTER CLERK MIDDLEWARE ===");
-// //   console.log("req.auth:", req.auth);
-// //   console.log("req.auth?.userId:", req.auth?.userId);
-// //   console.log("===============================");
-// //   next();
-// // });
-// // Custom Clerk Auth Middleware (Replaces clerkMiddleware)
-// app.use(async (req, res, next) => {
-//   console.log("🔐 Custom Clerk Auth Middleware");
-  
-//   const authHeader = req.headers.authorization;
-  
-//   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-//     console.log("❌ No Bearer token found");
-//     req.auth = null;
-//     return next();
-//   }
-  
-//   const token = authHeader.substring(7);
-//   console.log("Token received:", token.substring(0, 30) + "...");
-  
-//   try {
-//     // Verify the token with Clerk
-//     const payload = await clerk.verifyToken(token);
-//     console.log("✅ Token verified successfully!");
-//     console.log("User ID:", payload.sub);
-    
-//     // Set auth object on request
-//     req.auth = {
-//       userId: payload.sub,
-//       sessionId: payload.sid,
-//       ...payload
-//     };
-    
-//     console.log("✅ req.auth.userId set to:", req.auth.userId);
-//   } catch (error) {
-//     console.log("❌ Token verification failed:", error.message);
-//     req.auth = null;
-//   }
-  
-//   next();
-// });
-
-
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
-
-
-// // Routes
-// app.get('/',(req,res)=>res.send("API Working"))
-
-// app.get("/debug-sentry", function mainHandler(req, res) {
-//   throw new Error("My first Sentry error!");
-// });
-
-// app.post('/test', (req, res) => {
-//     console.log("Test Route Hit");
-//     res.json({ success: true });
-// });
-
-// app.use('/api/company',companyRoutes);
-// app.use('/api/jobs',jobRoutes);
-// app.use('/api/users',userRoutes);
-
-
-// // PORT
-// const PORT = process.env.PORT || 5000
-
-// Sentry.setupExpressErrorHandler(app);
-
-// app.listen(PORT,()=>{
-//     console.log(`Server is running on port ${PORT}`);
-// })
-
 
 import './config/instrument.js'
 import express from 'express'
@@ -147,7 +30,27 @@ const clerk = new Clerk({
 // ========== MIDDLEWARE ==========
 
 // 1. CORS
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://job-portal-new-client-jade.vercel.app', // Your frontend
+    'http://localhost:5173', // Local dev
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({});
+  }
+  next();
+});
 
 // 2. Custom Clerk Auth Middleware
 app.use(async (req, res, next) => {
@@ -225,6 +128,14 @@ app.post('/test', (req, res) => {
   console.log("Test Route Hit");
   res.json({ success: true });
 });
+
+app.options('*', cors({
+  origin: [
+    'https://job-portal-new-client-jade.vercel.app',
+    'http://localhost:5173'
+  ],
+  credentials: true
+}));
 
 // Your routes
 app.use('/api/company', companyRoutes);
