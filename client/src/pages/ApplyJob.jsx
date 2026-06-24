@@ -98,7 +98,7 @@ const ApplyJob = () => {
       console.log("📤 Full JobData:", JobData);
 
       const { data } = await axios.post(
-        `${backendUrl}+/api/users/apply,
+        `${backendUrl}/api/users/apply`,
         { jobId: JobData._id },
         { headers: { Authorization: `Bearer ${token}` } },
       );
