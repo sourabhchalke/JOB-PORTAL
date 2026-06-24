@@ -6,6 +6,10 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const RecruiterLogin = () => {
+
+  const { setShowRecruiterLogin, backendUrl, setCompanyToken, setCompanyData } =
+    useContext(AppContext);
+
   const navigate = useNavigate();
 
   const [state, setState] = useState("Login");
@@ -16,8 +20,7 @@ const RecruiterLogin = () => {
 
   const [isTextDataSubmited, setIsTextDataSubmited] = useState(false);
 
-  const { setShowRecruiterLogin, backendUrl, setCompanyToken, setCompanyData } =
-    useContext(AppContext);
+  
 
   //   const onSubmitHandler = async (e) => {
   //   e.preventDefault();

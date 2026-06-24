@@ -19,6 +19,10 @@ import { toast } from "react-toastify";
 import { useAuth } from "@clerk/react";
 
 const ApplyJob = () => {
+
+  const { jobs, backendUrl, userData, userApplicatins, fetchUserApplications } =
+    useContext(AppContext);
+
   const { id } = useParams();
 
   const { getToken } = useAuth();
@@ -29,12 +33,11 @@ const ApplyJob = () => {
 
   const [isAlreadyApplied, setIsAlreadyApplied] = useState(false);
 
-  const { jobs, backendUrl, userData, userApplicatins, fetchUserApplications } =
-    useContext(AppContext);
+  
 
   const fetchJob = async () => {
     try {
-      const { data } = await axios.get(backendUrl + `/api/jobs/${id}`);
+      const { data } = await axios.get(backendUrl+ `/api/jobs/${id}`);
 
       if (data.success) {
         setJobData(data.job);
@@ -95,7 +98,7 @@ const ApplyJob = () => {
       console.log("📤 Full JobData:", JobData);
 
       const { data } = await axios.post(
-        backendUrl + "/api/users/apply",
+        `${backendUrl}+/api/users/apply,
         { jobId: JobData._id },
         { headers: { Authorization: `Bearer ${token}` } },
       );

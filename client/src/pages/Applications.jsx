@@ -14,13 +14,15 @@ import { useEffect } from "react";
 
 const Applications = () => {
 
+  const {backendUrl,userData,userApplications,fetchUserData,fetchUserApplications} = useContext(AppContext);
+
   const {user} = useUser();
   const {getToken} = useAuth();
 
   const [isEdit, setIsEdit] = useState(false);
   const [resume, setResume] = useState(null);
 
-  const {backendUrl,userData,userApplications,fetchUserData,fetchUserApplications} = useContext(AppContext);
+  
 
   const updateResume = async()=>{
     try {
