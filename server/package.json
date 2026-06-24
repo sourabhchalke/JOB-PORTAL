@@ -8,10 +8,9 @@
     "start": "node server.js",
     "vercel-build": "npm install"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "engines": {
+    "node": ">=18.x"
+  },
   "dependencies": {
     "@clerk/clerk-sdk-node": "^4.13.23",
     "@clerk/express": "^2.1.26",
