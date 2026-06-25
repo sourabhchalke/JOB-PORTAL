@@ -1,7 +1,7 @@
 
 //New
 import Company from "../models/Company.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { v2 as cloudinary } from "cloudinary";
 import generateToken from "../utils/generateToken.js";
 import fs from "fs"; // For deleting temp file after upload
