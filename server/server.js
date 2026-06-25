@@ -173,9 +173,9 @@
 // }
 
 //New Server.js file
-import express from 'express'
-import cors from 'cors'
-import 'dotenv/config'
+import express from 'express';
+import cors from 'cors';
+import 'dotenv/config';
 import connectDB from './config/db.js';
 import connectCloudinary from './config/cloudinary.js';
 import companyRoutes from './routes/companyRoutes.js';
@@ -186,40 +186,40 @@ import { Clerk } from '@clerk/clerk-sdk-node';
 
 const app = express();
 
-// ========== CORS CONFIGURATION - FIXED FOR VERCEL ==========
-// Use the cors package as the primary CORS handler
-const corsOptions = {
+// ========== CORS CONFIGURATION ==========
+// Enable CORS for all origins with specific configuration
+app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (like mobile apps, curl, postman)
     if (!origin) {
       return callback(null, true);
     }
     
-    // List of allowed origins
+    // Allow all Vercel domains
+    if (origin.includes('vercel.app')) {
+      return callback(null, true);
+    }
+    
+    // Allow localhost for development
+    if (origin.includes('localhost')) {
+      return callback(null, true);
+    }
+    
+    // Add your specific frontend URL
     const allowedOrigins = [
       'http://localhost:5173',
       'http://localhost:3000',
-      'http://localhost:5000',
-      'https://job-portal-new-client-csh0tnaqq-sourabh-chalkes-projects.vercel.app',
       'https://job-portal-new-client.vercel.app',
-      // Allow any Vercel app
-      /.+\.vercel\.app$/
+      'https://job-portal-new-client-csh0tnaqq-sourabh-chalkes-projects.vercel.app'
     ];
     
-    // Check if origin is allowed
-    const isAllowed = allowedOrigins.some(pattern => {
-      if (typeof pattern === 'string') {
-        return origin === pattern;
-      }
-      return pattern.test(origin);
-    });
-    
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      console.log(`❌ CORS blocked for origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
     }
+    
+    // For debugging - allow all during development
+    console.log(`⚠️ CORS allowing origin (debug): ${origin}`);
+    return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -228,32 +228,12 @@ const corsOptions = {
   maxAge: 86400,
   preflightContinue: false,
   optionsSuccessStatus: 204
-};
+}));
 
-// Apply CORS before ANY other middleware
-app.use(cors(corsOptions));
-
-// Additional CORS headers for safety
+// ========== REQUEST LOGGING ==========
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-  }
-  next();
-});
-
-// ========== REQUEST LOGGING MIDDLEWARE ==========
-app.use((req, res, next) => {
-  console.log('========================================');
-  console.log(`📨 REQUEST: ${req.method} ${req.url}`);
+  console.log(`📨 ${req.method} ${req.url}`);
   console.log(`📍 Origin: ${req.headers.origin || 'No origin'}`);
-  
-  // FIX: Safely check if body exists before using Object.keys
-  if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
-    console.log(`📦 Body:`, req.body);
-  }
-  console.log(`🔑 Auth header: ${req.headers.authorization ? 'Present' : 'Missing'}`);
   next();
 });
 
@@ -265,7 +245,6 @@ try {
   console.log('✅ Database connected');
 } catch (error) {
   console.error('❌ Database connection failed:', error.message);
-  console.log('⚠️ Server will continue without database');
 }
 
 try {
@@ -287,16 +266,13 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // ========== AUTH MIDDLEWARE ==========
 app.use(async (req, res, next) => {
   const authHeader = req.headers.authorization;
-  console.log(`🔐 Auth check: ${authHeader ? 'Header present' : 'No auth header'}`);
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     req.auth = null;
-    console.log('⚠️ No valid auth token found');
     return next();
   }
   
   const token = authHeader.substring(7);
-  console.log(`🔑 Token length: ${token.length} characters`);
   
   try {
     const payload = await clerk.verifyToken(token);
@@ -325,7 +301,6 @@ app.post(
 
 // Health check route
 app.get('/', (req, res) => {
-  console.log('🏥 Health check requested');
   res.json({ 
     success: true, 
     message: 'API is running!',
@@ -337,7 +312,6 @@ app.get('/', (req, res) => {
 
 // Test route
 app.get('/api/test', (req, res) => {
-  console.log('🧪 Test endpoint requested');
   res.json({ 
     success: true, 
     message: 'API test endpoint is working!',
@@ -349,65 +323,37 @@ app.get('/api/test', (req, res) => {
 
 // Auth check
 app.get('/api/auth-check', (req, res) => {
-  console.log('🔐 Auth check endpoint requested');
   res.json({
     hasAuth: !!req.auth,
     userId: req.auth?.userId || null,
-    message: req.auth?.userId ? "✅ Auth working!" : "❌ No auth found",
-    headers: {
-      hasAuthorization: !!req.headers.authorization,
-      origin: req.headers.origin || 'none'
-    }
+    message: req.auth?.userId ? "✅ Auth working!" : "❌ No auth found"
   });
 });
 
-// Routes listing endpoint
+// Routes listing
 app.get('/api/routes', (req, res) => {
-  console.log('📋 Routes list requested');
   const routes = [];
-  
   try {
     if (app._router && app._router.stack) {
-      app._router.stack.forEach(middleware => {
-        if (middleware.route) {
+      app._router.stack.forEach((layer) => {
+        if (layer.route) {
           routes.push({
-            path: middleware.route.path,
-            methods: Object.keys(middleware.route.methods)
-          });
-        } else if (middleware.name === 'router' && middleware.handle && middleware.handle.stack) {
-          const basePath = middleware.regexp.source
-            .replace(/\\\//g, '/')
-            .replace(/\^/g, '')
-            .replace(/\?/g, '')
-            .replace(/\(\?:\(\[\^\\\/\]\+\)\)/g, '/:path*');
-          
-          middleware.handle.stack.forEach(handler => {
-            if (handler.route) {
-              routes.push({
-                path: `${basePath}${handler.route.path}`,
-                methods: Object.keys(handler.route.methods)
-              });
-            }
+            path: layer.route.path,
+            methods: Object.keys(layer.route.methods)
           });
         }
       });
     }
-    
-    res.json({
-      success: true,
-      routes: routes,
-      totalRoutes: routes.length,
-      timestamp: new Date().toISOString()
-    });
   } catch (error) {
     console.error('Error listing routes:', error.message);
-    res.json({
-      success: false,
-      message: error.message,
-      routes: [],
-      totalRoutes: 0
-    });
   }
+  
+  res.json({
+    success: true,
+    routes: routes,
+    totalRoutes: routes.length,
+    timestamp: new Date().toISOString()
+  });
 });
 
 // ========== YOUR ACTUAL ROUTES ==========
@@ -417,48 +363,12 @@ app.use('/api/jobs', jobRoutes);
 app.use('/api/users', userRoutes);
 console.log('✅ Routes registered');
 
-// ========== DEBUG: Log all registered routes ==========
-console.log('📋 Registered Routes:');
-
-const safeLogRoute = (method, path) => {
-  console.log(`  ${method.padEnd(10)} ${path}`);
-};
-
-try {
-  safeLogRoute('GET', '/');
-  safeLogRoute('GET', '/api/test');
-  safeLogRoute('GET', '/api/auth-check');
-  safeLogRoute('GET', '/api/routes');
-  safeLogRoute('POST', '/webhooks');
-  
-  if (app._router && app._router.stack) {
-    app._router.stack.forEach((layer) => {
-      if (layer.route) {
-        const methods = Object.keys(layer.route.methods).join(', ').toUpperCase();
-        safeLogRoute(methods, layer.route.path);
-      }
-    });
-  }
-  
-  console.log('  📁 /api/company/*');
-  console.log('  📁 /api/jobs/*');
-  console.log('  📁 /api/users/*');
-  
-} catch (error) {
-  console.log('  ⚠️ Could not log all routes:', error.message);
-  console.log('  📁 /api/company/*');
-  console.log('  📁 /api/jobs/*');
-  console.log('  📁 /api/users/*');
-}
-
 // ========== 404 HANDLER ==========
 app.use((req, res) => {
-  console.log(`❌ 404 ERROR: ${req.method} ${req.originalUrl}`);
-  console.log(`🔍 Available routes: /api/jobs, /api/company, /api/users, /api/test, /api/auth-check`);
-  
+  console.log(`❌ 404: ${req.method} ${req.url}`);
   res.status(404).json({ 
     success: false, 
-    message: `Route not found: ${req.method} ${req.originalUrl}`,
+    message: `Route not found: ${req.method} ${req.url}`,
     availableRoutes: [
       '/',
       '/api/test',
@@ -475,10 +385,8 @@ app.use((req, res) => {
 
 // ========== ERROR HANDLER ==========
 app.use((err, req, res, next) => {
-  console.error('❌ SERVER ERROR:');
-  console.error(`📌 Error: ${err.message}`);
-  console.error(`📌 Stack: ${err.stack}`);
-  
+  console.error('❌ Server Error:', err.message);
+  console.error('Stack:', err.stack);
   res.status(500).json({ 
     success: false, 
     message: err.message || 'Internal Server Error',
@@ -495,16 +403,7 @@ if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log('========================================');
     console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log('📡 CORS: Allowed origins configured');
-    console.log('📋 Available endpoints:');
-    console.log('  - GET  /');
-    console.log('  - GET  /api/test');
-    console.log('  - GET  /api/auth-check');
-    console.log('  - GET  /api/routes');
-    console.log('  - POST /webhooks');
-    console.log('  - GET  /api/jobs');
-    console.log('  - GET  /api/company');
-    console.log('  - GET  /api/users');
+    console.log('📡 CORS: All Vercel and localhost origins allowed');
     console.log('========================================');
   });
 }
