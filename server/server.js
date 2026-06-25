@@ -186,11 +186,21 @@ import { Clerk } from '@clerk/clerk-sdk-node';
 
 const app = express();
 
+// ========== SECURITY HEADERS ==========
+app.use((req, res, next) => {
+  // Security headers to prevent Chrome warnings
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  next();
+});
+
 // ========== CORS CONFIGURATION ==========
-// Enable CORS for all origins with specific configuration
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, postman)
     if (!origin) {
       return callback(null, true);
     }
@@ -205,7 +215,7 @@ app.use(cors({
       return callback(null, true);
     }
     
-    // Add your specific frontend URL
+    // Allow specific frontend URLs
     const allowedOrigins = [
       'http://localhost:5173',
       'http://localhost:3000',
@@ -217,17 +227,13 @@ app.use(cors({
       return callback(null, true);
     }
     
-    // For debugging - allow all during development
-    console.log(`⚠️ CORS allowing origin (debug): ${origin}`);
+    console.log(`⚠️ CORS allowing origin: ${origin}`);
     return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization', 'X-CSRF-Token'],
-  exposedHeaders: ['Authorization', 'Content-Length', 'X-Total-Count'],
-  maxAge: 86400,
-  preflightContinue: false,
-  optionsSuccessStatus: 204
+  exposedHeaders: ['Authorization', 'Content-Length', 'X-Total-Count']
 }));
 
 // ========== REQUEST LOGGING ==========
@@ -299,7 +305,7 @@ app.post(
 
 // ========== ROUTES ==========
 
-// Health check route
+// Health check
 app.get('/', (req, res) => {
   res.json({ 
     success: true, 
@@ -316,8 +322,7 @@ app.get('/api/test', (req, res) => {
     success: true, 
     message: 'API test endpoint is working!',
     timestamp: new Date().toISOString(),
-    requestOrigin: req.headers.origin || 'Same-origin',
-    requestMethod: req.method
+    requestOrigin: req.headers.origin || 'Same-origin'
   });
 });
 
@@ -378,19 +383,16 @@ app.use((req, res) => {
       '/api/company',
       '/api/users',
       '/webhooks'
-    ],
-    timestamp: new Date().toISOString()
+    ]
   });
 });
 
 // ========== ERROR HANDLER ==========
 app.use((err, req, res, next) => {
   console.error('❌ Server Error:', err.message);
-  console.error('Stack:', err.stack);
   res.status(500).json({ 
     success: false, 
-    message: err.message || 'Internal Server Error',
-    timestamp: new Date().toISOString()
+    message: err.message || 'Internal Server Error'
   });
 });
 
@@ -401,9 +403,6 @@ export default app;
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
-    console.log('========================================');
     console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log('📡 CORS: All Vercel and localhost origins allowed');
-    console.log('========================================');
   });
 }
