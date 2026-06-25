@@ -1,20 +1,23 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const connectDB = async () => {
   try {
+    // ✅ REMOVE all deprecated options
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      // Only use these options if needed:
+      // - No useNewUrlParser (default in v4+)
+      // - No useUnifiedTopology (default in v4+)
+      // - Add other options if required
     });
+    
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     return conn;
+    
   } catch (error) {
     console.error(`❌ MongoDB Connection Error: ${error.message}`);
-    // Don't exit process on Vercel
-    if (process.env.NODE_ENV !== 'production') {
-      process.exit(1);
-    }
-    throw error;
+    process.exit(1);
   }
 };
 
